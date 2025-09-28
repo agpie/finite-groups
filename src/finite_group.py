@@ -1,30 +1,8 @@
+import pandas as pd
 from itertools import product
 
-# Z4
-elements = [0, 1, 2, 3]
-
-'''
-opTable = {
-    (0, 0): 0,
-    (0, 1): 1,
-    (0, 2): 2,
-    (0, 3): 3,
-    (1, 0): 1,
-    (1, 1): 2,
-    (1, 2): 3,
-    (1, 3): 0,
-    (2, 0): 2,
-    (2, 1): 3,
-    (2, 2): 0,
-    (2, 3): 1,
-    (3, 0): 3,
-    (3, 1): 0,
-    (3, 2): 1,
-    (3, 3): 2
-}
-'''
-
 def create_z4():
+    ''' Create the group Z4 with its operation table '''
     elements = [0, 1, 2, 3]
     table = {}
 
@@ -35,16 +13,24 @@ def create_z4():
 
     return elements, table
 
+def operate(a, b, table):
+    ''' Perform the group operation on elements a and b using the operation table '''
+    return table[(a, b)]
 
-def multiply(a, b, Table):
-    return Table[(a, b)]
+def display_table(table):
+    ''' Display the operation table in a readable format '''
+    df = pd.DataFrame(index=elements, columns=elements)
+    for (a, b), result in table.items():
+        df.loc[a, b] = result
+    print(df)
 
-#result = multiply(2, 3, opTable)
-#print(result)
-elements, table = create_z4()
-print("Elements: ", elements)
-print("Operation Table: ")
-for key in table:
-    print(f"{key}: {table[key]}")
-result = multiply(2, 3, table)
-print("2 * 3 = ", result)
+if __name__ == "__main__":
+    elements, table = create_z4()
+    print("Elements of Z4:", elements)
+    print("Operation Table:")
+    display_table(table)
+
+    # Example operation
+    a, b = 2, 3
+    result = operate(a, b, table)
+    print(f"Example: {a} * {b} = {result}")
