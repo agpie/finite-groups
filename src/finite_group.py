@@ -2,7 +2,7 @@ import pandas as pd
 from itertools import product
 
 def create_Cn(n):
-    ''' Create the group Z4 with its operation table '''
+    ''' Create the group Cn with its operation table '''
     elements = list(range(n))
     table = {}
 
@@ -15,7 +15,7 @@ def operate(a, b, table):
     ''' Perform the group operation on elements a and b using the operation table '''
     return table[(a, b)]
 
-def display_table(table):
+def display_table(elements, table):
     ''' Display the operation table in a readable format '''
     df = pd.DataFrame(index=elements, columns=elements)
     for (a, b), result in table.items():
