@@ -3,20 +3,28 @@ from itertools import product
 
 class FiniteGroup:
     
-    def __init__(self, elements, table):
+    def __init__(self, elements, table, labels=None):
         self.elements = elements
         self.table = table
         self.order = len(elements)
-    
+        self.labels = labels if labels else [str(i) for i in range(self.order)]
+        self.identity = self.find_identity()
+
+    def get_label(self, element):
+        ''' Get the label of an element '''
+        if element in self.elements:
+            return self.labels[self.elements.index(element)]
+        return None
+
     def operate(self, a, b):
         ''' Perform the group operation on elements a and b using the operation table '''
         return self.table[(a, b)]
     
     def display_table(self):
         ''' Display the operation table in a readable format '''
-        df = pd.DataFrame(index=self.elements, columns=self.elements)
+        df = pd.DataFrame(index=self.labels, columns=self.labels)
         for (a, b), result in self.table.items():
-            df.loc[a, b] = result
+            df.loc[self.get_label(a), self.get_label(b)] = self.get_label(result)
         print(df)
     
     def find_identity(self):
@@ -49,7 +57,7 @@ class FiniteGroup:
         return True
 
 def create_Cn(n):
-    ''' Create the group Cn with its operation table '''
+    ''' Create the cyclic group Cn with its operation table '''
     elements = list(range(n))
     table = {}
 
@@ -60,13 +68,12 @@ def create_Cn(n):
 
 if __name__ == "__main__":
     
-    C4 = FiniteGroup(*create_Cn(4))
+    C4 = FiniteGroup(*create_Cn(4), labels=['e', 'a', 'a2', 'a3'])
 
     print("Elements of C4:", C4.elements)
     print("Order of the group C4:", C4.order)
     print("Operation Table of C4:")
     C4.display_table()
-    print("Order of each element in C4:", C4.check_order())
-    print("Identity Element of C4:", C4.find_identity())
+    print("Order of each element in C4:", {C4.get_label(k): v for k, v in C4.check_order().items()})
+    print("Identity Element of C4:", C4.get_label(C4.identity))
     print("Is C4 abelian?", C4.is_abelian())
-    print("Operate 2 and 3 in C4:", C4.operate(2, 3))
