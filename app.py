@@ -1,29 +1,58 @@
 import streamlit as st
 import pandas as pd
-from src.finite_group import create_Cn, operate, display_table, check_order, find_identity, is_abelian
+from src.finite_group import FiniteGroup, create_Cn, create_Dn
 
 st.title("Finite Group Visualiser")
 
-n = st.number_input("Enter the order of the cyclic group Cn:", min_value=1, value=4, step=1, key="n")
-if st.button("Generate Group") or ("elements" in st.session_state and "table" in st.session_state):
-    if "elements" not in st.session_state or "table" not in st.session_state or st.session_state.n != n:
-        elements, table = create_Cn(n)
-        st.session_state["elements"] = elements
-        st.session_state["table"] = table
+family = st.selectbox("Select a family of finite groups:", ["Cyclic Group (Cn)", "Dihedral Group (Dn)"])
+
+if family == "Cyclic Groups (Cn)":
+    order = st.number_input("Enter order of cyclic group:", min_value=1, value=4, step=1, key="n_cyclic")
+else:
+    order = st.number_input("Enter order of dihedral group:", min_value=2, value=4, step=2, key="n_dihedral")
+
+if st.button("Generate Group"):
+    if family == "Cyclic Groups (Cn)":
+        elements, table = create_Cn(order)
+        if order == 1:
+            labels = ['e']
+        elif order == 2:
+            labels = ['e', 'g']
+        else:
+            labels = ['e', 'g'] + [f'g{i}' for i in range(2, order)]
+        group = FiniteGroup(elements, table, labels=labels)
     else:
-        elements = st.session_state["elements"]
-        table = st.session_state["table"]
+        elements, table, labels = create_Dn(order)
+        group = FiniteGroup(elements, table, labels=labels)
 
-    st.write("Elements of Cn:", elements)
-    st.write("Order of each element:", check_order(elements, table))
-    st.write("Identity Element:", find_identity(elements, table))
-    st.write("Is the group abelian?", is_abelian(elements, table))
-    st.write("Operation Table:")
-    display_table(elements, table)
-    st.dataframe(pd.DataFrame.from_dict(table, orient='index'))
+    st.session_state['group'] = group
+    st.session_state['family'] = family
+    st.session_state['order'] = order
 
-    a = st.number_input("Enter first element (a):", min_value=0, max_value=n-1, value=0, step=1, key="a")
-    b = st.number_input("Enter second element (b):", min_value=0, max_value=n-1, value=0, step=1, key="b")
-    if st.button("Operate a and b"):
-        result = operate(a, b, table)
-        st.write(f"The result of operating {a} and {b} is: {result}")
+st.divider()
+
+if 'group' in st.session_state:
+    group = st.session_state['group']
+    family = st.session_state['family']
+    order = st.session_state['order']
+
+    st.header(f"Group: {family} of order {order}")
+
+    st.markdown("## Operation Table")
+    df = pd.DataFrame(index=group.labels, columns=group.labels)
+    for i, g in enumerate(group.elements):
+        for j, h in enumerate(group.elements):
+            df.iat[i, j] = group.labels[group.table[(g, h)]]
+    st.dataframe(df)
+
+    st.markdown("## Group Properties")
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Order of Group", len(group.elements), border=True)
+    col2.metric("Identity Element", group.labels[group.identity] if group.identity is not None else "None", border=True)
+    col3.metric("Is Abelian", "Yes" if group.is_abelian() else "No", border=True)
+
+    element_orders = group.element_orders()
+    orders_str = ", ".join([f"{group.labels[k]}: {v}" for k, v in element_orders.items()])
+    st.markdown(f"### Orders of Elements:\n{orders_str}")
+    

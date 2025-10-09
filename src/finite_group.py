@@ -34,9 +34,9 @@ class FiniteGroup:
                 return e
         return None
 
-    def check_order(self):
+    def element_orders(self):
         ''' Check the order of each element in the group '''
-        e = self.find_identity()
+        e = self.identity
         orders = {}
         for g in self.elements:
             order = 1
@@ -70,7 +70,10 @@ def create_Dn(n):
     ''' Create the dihedral group Dn with its operation table '''
     elements = list(range(n))
     table = {}
-    labels = ['e'] + [f'r{i}' for i in range(1, n//2)] + ['s'] + [f'sr{i}' for i in range(1, n//2)]
+    if n == 2:
+        labels = ['e', 's']
+    else:
+        labels = ['e'] + [f'r{i}' for i in range(1, n//2)] + ['s'] + [f'sr{i}' for i in range(1, n//2)]
 
     for a in elements:
         for b in elements:
@@ -93,7 +96,7 @@ if __name__ == "__main__":
     print("Order of the group C4:", C4.order)
     print("Operation Table of C4:")
     C4.display_table()
-    print("Order of each element in C4:", {C4.get_label(k): v for k, v in C4.check_order().items()})
+    print("Order of each element in C4:", {C4.get_label(k): v for k, v in C4.element_orders().items()})
     print("Identity Element of C4:", C4.get_label(C4.identity))
     print("Is C4 abelian?", C4.is_abelian())
 
@@ -103,6 +106,6 @@ if __name__ == "__main__":
     print("Order of the group D6:", D6.order)
     print("Operation Table of D6:")
     D6.display_table()
-    print("Order of each element in D6:", {D6.get_label(k): v for k, v in D6.check_order().items()})
+    print("Order of each element in D6:", {D6.get_label(k): v for k, v in D6.element_orders().items()})
     print("Identity Element of D6:", D6.get_label(D6.identity))
     print("Is D6 abelian?", D6.is_abelian())
